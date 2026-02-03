@@ -1,0 +1,165 @@
+task.spawn(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/imlagging678-lab/spawn/refs/heads/main/anim"))()
+end)
+-- ==========================================
+-- TASK 2: SENİN SMOOTH FLOAT
+-- ==========================================
+task.wait(5) -- Bayılma ve kalkışın bitme süresine göre ayarlı
+task.spawn(function()
+    local Players = game:GetService("Players")
+    local RunService = game:GetService("RunService")
+    local player = Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:WaitForChild("Humanoid")
+
+    local minHeight = 1
+    local maxHeight = 2
+    local speed = 2
+    local active = true
+
+    local function smoothFloat()
+        local t = 0
+        local connection
+        connection = RunService.Heartbeat:Connect(function(deltaTime)
+            if not active or not humanoid or not humanoid.Parent or humanoid.PlatformStand then 
+                return 
+            end
+            t = t + deltaTime * speed
+            local sineWave = (math.sin(t) + 1) / 2
+            humanoid.HipHeight = minHeight + (sineWave * (maxHeight - minHeight))
+        end)
+    end
+    smoothFloat()
+end)
+
+-- ==========================================
+-- TASK 3: TILT & DASH MANTIĞIYLA SABİTLENMİŞ BASE
+-- ==========================================
+task.wait(5.30) -- Bayılma/Kalkış bitene kadar bekler
+task.spawn(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/imlagging678-lab/anim/refs/heads/main/fly"))()
+end)
+-- ==========================================
+--task3 continue=
+--###########################################
+task.wait(5.15)
+task.spawn(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/imlagging678-lab/hand/refs/heads/main/sth"))()
+end)
+-- ==========================================
+-- TASK 4: SENİN DASH MEKANİZMASI (FULL)
+-- ==========================================
+task.spawn(function()
+    local UserInputService = game:GetService("UserInputService")
+    local Players = game:GetService("Players")
+    local player = Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:WaitForChild("Humanoid")
+    local animator = humanoid:WaitForChild("Animator")
+    local HRP = character:WaitForChild("HumanoidRootPart")
+
+    local function newAnim(id)
+        local anim = Instance.new("Animation")
+        anim.AnimationId = "rbxassetid://" .. id
+        return anim
+    end
+
+    local dTracks = {
+        frontDash = animator:LoadAnimation(newAnim(97171309)),
+        right1 = animator:LoadAnimation(newAnim(136801964)),
+        right2 = animator:LoadAnimation(newAnim(142495255)),
+        left1 = animator:LoadAnimation(newAnim(136801964)),
+        left2 = animator:LoadAnimation(newAnim(142495255)),
+        backMain = animator:LoadAnimation(newAnim(214744412)),
+        back2 = animator:LoadAnimation(newAnim(106772613)),
+        back3 = animator:LoadAnimation(newAnim(42070810))
+    }
+    for _, track in pairs(dTracks) do track.Priority = Enum.AnimationPriority.Action4 end
+
+    UserInputService.InputBegan:Connect(function(input, gp)
+        if gp or input.KeyCode ~= Enum.KeyCode.Q or HRP.Anchored then return end
+        
+        local moveDirection = humanoid.MoveDirection
+        if moveDirection.Magnitude == 0 then moveDirection = HRP.CFrame.LookVector end
+        local relativeDir = HRP.CFrame:VectorToObjectSpace(moveDirection)
+        
+        local selectedDirection = ""
+        local currentPower = 65
+
+        if relativeDir.Z < -0.5 then selectedDirection = "Front"; currentPower = 75
+        elseif relativeDir.Z > 0.5 then selectedDirection = "Back"
+        elseif relativeDir.X > 0.5 then selectedDirection = "Right"
+        elseif relativeDir.X < -0.5 then selectedDirection = "Left"
+        else selectedDirection = "Front"; currentPower = 75 end
+
+        for _, v in pairs(dTracks) do v:Stop(0.1) end
+
+        if selectedDirection == "Front" then
+            dTracks.frontDash:Play(0.1); dTracks.frontDash.TimePosition = 0.2
+            task.delay(0.05, function() dTracks.frontDash:AdjustSpeed(0) end)
+        elseif selectedDirection == "Back" then
+            dTracks.backMain:Play(0.1); dTracks.back2:Play(0.1); dTracks.back3:Play(0.1)
+        elseif selectedDirection == "Right" then
+            dTracks.right1:Play(0.1); dTracks.right1.TimePosition = 1.1; dTracks.right1:AdjustSpeed(0); dTracks.right2:Play(0.1)
+        elseif selectedDirection == "Left" then
+            dTracks.left1:Play(0.1); dTracks.left1.TimePosition = 2.0; dTracks.left1:AdjustSpeed(0); dTracks.left2:Play(0.1)
+        end
+
+        local att = Instance.new("Attachment", HRP)
+        local lv = Instance.new("LinearVelocity", HRP)
+        lv.MaxForce, lv.VelocityConstraintMode = 9999999, Enum.VelocityConstraintMode.Vector
+        lv.VectorVelocity, lv.Attachment0 = moveDirection * currentPower, att
+
+        local dbg = Instance.new("BodyGyro", HRP)
+        dbg.MaxTorque = Vector3.new(1e6, 1e6, 1e6); dbg.D, dbg.P = 300, 12000
+        
+        local dashActive = true
+        task.spawn(function()
+            while dashActive do
+                if dbg and dbg.Parent then
+                    local tilt = (selectedDirection == "Front" and -45) or (selectedDirection == "Back" and 45) or 0
+                    dbg.CFrame = CFrame.new(HRP.Position, HRP.Position + moveDirection * 5) * CFrame.Angles(math.rad(tilt), 0, 0)
+                end
+                task.wait()
+            end
+        end)
+
+        task.wait(0.22)
+        dashActive = false
+        lv:Destroy(); att:Destroy(); dbg:Destroy()
+        for _, v in pairs(dTracks) do v:Stop(0.1) end
+    end)
+end)
+
+-- ==========================================
+-- TASK 5: SENİN TPWALK BOOST
+-- ==========================================
+task.spawn(function()
+    local Players = game:GetService("Players")
+    local RunService = game:GetService("RunService")
+    local player = Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:WaitForChild("Humanoid")
+
+    local speed = 1
+    local tpwalkStack = 0
+
+    RunService.Heartbeat:Connect(function(delta)
+        if not (character and humanoid and humanoid.Parent) then return end
+        if humanoid.MoveDirection.Magnitude > 0 and not character.HumanoidRootPart.Anchored then
+            character:TranslateBy(humanoid.MoveDirection * (speed + tpwalkStack) * delta * 10)
+        end
+    end)
+end)
+--culefekt
+task.spawn(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/imlagging678-lab/culefekt/refs/heads/main/i"))()
+end)
+--headouch
+task.spawn(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/imlagging678-lab/ouchheaddie/refs/heads/main/ow"))() 
+end)
+--yujiiiiiiiii/bestofrendo
+task.spawn(function() 
+loadstring(game:HttpGet("https://raw.githubusercontent.com/imlagging678-lab/yujiiiii/refs/heads/main/yujiiiiii"))() 
+end)
