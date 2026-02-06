@@ -44,7 +44,7 @@ end)
 --###########################################
 task.wait(5.15)
 task.spawn(function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/imlagging678-lab/hand/refs/heads/main/sth"))()
+    loadstring(game:HttpGet("-lab/hand/refs/heads/main/sthhttps://raw.githubusercontent.com/imlagging678"))()
 end)
 -- ==========================================
 -- TASK 4: SENİN DASH MEKANİZMASI (FULL)
@@ -162,4 +162,9 @@ end)
 --yujiiiiiiiii/bestofrendo
 task.spawn(function() 
 loadstring(game:HttpGet("https://raw.githubusercontent.com/imlagging678-lab/yujiiiii/refs/heads/main/yujiiiiii"))() 
+end)
+task.spawn(function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/imlagging678-lab/naoyaeffect/refs/heads/main/bumoya"))()
+end)
+	
 end)
